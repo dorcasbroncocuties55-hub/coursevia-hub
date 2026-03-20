@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -16,6 +16,7 @@ const ProtectedRoute = ({
   requireOnboarding = true,
 }: ProtectedRouteProps) => {
   const { user, roles, profile, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -26,14 +27,20 @@ const ProtectedRoute = ({
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (requireOnboarding && profile && !profile.onboarding_completed) {
+  // If onboarding not completed and we require it, redirect (unless already on /onboarding)
+  if (requireOnboarding && profile && !profile.onboarding_completed && location.pathname !== "/onboarding") {
     return <Navigate to="/onboarding" replace />;
   }
 
   if (requiredRole && !roles.includes(requiredRole)) {
+    // Redirect to the appropriate dashboard based on first role
+    if (roles.includes("admin")) return <Navigate to="/admin/dashboard" replace />;
+    if (roles.includes("coach")) return <Navigate to="/coach/dashboard" replace />;
+    if (roles.includes("creator")) return <Navigate to="/creator/dashboard" replace />;
+    if (roles.includes("learner")) return <Navigate to="/dashboard" replace />;
     return <Navigate to="/" replace />;
   }
 

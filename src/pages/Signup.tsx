@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,11 +11,23 @@ import { Eye, EyeOff } from "lucide-react";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user && profile) {
+      if (!profile.onboarding_completed) {
+        navigate("/onboarding");
+      } else {
+        navigate("/dashboard");
+      }
+    }
+  }, [user, profile, navigate]);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,8 +48,8 @@ const Signup = () => {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Account created! Please check your email to verify.");
-      navigate("/onboarding");
+      toast.success("Account created! Redirecting to onboarding...");
+      // Auth state listener handles redirect
     }
   };
 
@@ -51,13 +64,9 @@ const Signup = () => {
     <div className="min-h-screen bg-background flex">
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
-          <Link to="/" className="text-xl font-bold text-foreground">
-            Coursevia
-          </Link>
+          <Link to="/" className="text-xl font-bold text-foreground">Coursevia</Link>
           <h1 className="text-2xl font-bold text-foreground mt-8 mb-2">Create your account</h1>
-          <p className="text-muted-foreground text-sm mb-8">
-            Start your journey to learn, teach, or coach.
-          </p>
+          <p className="text-muted-foreground text-sm mb-8">Start your journey to learn, teach, or coach.</p>
 
           <Button variant="outline" className="w-full mb-6" onClick={handleGoogleSignup}>
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -70,69 +79,35 @@ const Signup = () => {
           </Button>
 
           <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-background px-2 text-muted-foreground">or</span>
-            </div>
+            <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
+            <div className="relative flex justify-center text-xs"><span className="bg-background px-2 text-muted-foreground">or</span></div>
           </div>
 
           <form onSubmit={handleSignup} className="space-y-4">
             <div>
               <Label htmlFor="fullName">Full name</Label>
-              <Input
-                id="fullName"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="John Doe"
-                required
-              />
+              <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="John Doe" required />
             </div>
             <div>
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                required
-              />
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
             </div>
             <div>
               <Label htmlFor="password">Password</Label>
               <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Min 6 characters"
-                  required
-                  minLength={6}
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
+                <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min 6 characters" required minLength={6} />
+                <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowPassword(!showPassword)}>
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating account..." : "Create account"}
-            </Button>
+            <Button type="submit" className="w-full" disabled={loading}>{loading ? "Creating account..." : "Create account"}</Button>
           </form>
 
           <p className="text-sm text-muted-foreground text-center mt-6">
             Already have an account?{" "}
-            <Link to="/login" className="text-primary hover:underline font-medium">
-              Sign in
-            </Link>
+            <Link to="/login" className="text-primary hover:underline font-medium">Sign in</Link>
           </p>
-
           <p className="text-xs text-muted-foreground text-center mt-4">
             By signing up, you agree to our{" "}
             <Link to="/terms" className="underline">Terms</Link> and{" "}
@@ -143,12 +118,8 @@ const Signup = () => {
 
       <div className="hidden lg:flex flex-1 bg-accent/5 items-center justify-center p-12">
         <div className="max-w-md text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-4">
-            Turn your expertise into income
-          </h2>
-          <p className="text-muted-foreground">
-            Create courses, coach students, and build your brand on Coursevia.
-          </p>
+          <h2 className="text-3xl font-bold text-foreground mb-4">Turn your expertise into income</h2>
+          <p className="text-muted-foreground">Create courses, coach students, and build your brand on Coursevia.</p>
         </div>
       </div>
     </div>
