@@ -3,66 +3,255 @@ import Footer from "@/components/landing/Footer";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Star } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Star, Shield, Clock, Globe, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
+import PaymentModal from "@/components/PaymentModal";
 
 const CoachDetails = () => {
   const { id } = useParams();
+  const { user } = useAuth();
   const [coach, setCoach] = useState<any>(null);
   const [services, setServices] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [bookingService, setBookingService] = useState<any>(null);
+  const [bookingDate, setBookingDate] = useState("");
+  const [bookingNotes, setBookingNotes] = useState("");
+  const [showPayment, setShowPayment] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(false);
 
   useEffect(() => {
     if (!id) return;
-    supabase.from("coach_profiles").select("*, profiles!coach_profiles_user_id_fkey(full_name, avatar_url, bio)").eq("id", id).single().then(({ data }) => setCoach(data));
+    supabase.from("coach_profiles").select("*").eq("id", id).single().then(async ({ data }) => {
+      if (data) {
+        const { data: profile } = await supabase.from("profiles").select("full_name, avatar_url, bio").eq("user_id", data.user_id).single();
+        setCoach({ ...data, profile });
+      }
+    });
     supabase.from("coach_services").select("*").eq("coach_id", id).eq("is_active", true).then(({ data }) => setServices(data || []));
+    supabase.from("reviews").select("*, profiles:reviewer_id(full_name)").eq("reviewable_id", id).eq("reviewable_type", "coach").order("created_at", { ascending: false }).limit(10)
+      .then(({ data }) => setReviews(data || []));
   }, [id]);
 
-  if (!coach) return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" /></div>;
+  const handleBooking = async () => {
+    if (!user || !bookingService || !bookingDate) {
+      toast.error("Please select a date and time");
+      return;
+    }
+    setBookingLoading(true);
+    try {
+      const { error } = await supabase.from("bookings").insert({
+        coach_id: bookingService.coach_id,
+        learner_id: user.id,
+        service_id: bookingService.id,
+        scheduled_at: new Date(bookingDate).toISOString(),
+        duration_minutes: bookingService.duration_minutes,
+        notes: bookingNotes,
+        status: "pending",
+      });
+      if (error) throw error;
+
+      // If service has a price, show payment
+      if (Number(bookingService.price) > 0) {
+        setShowPayment(true);
+      } else {
+        toast.success("Booking created! Awaiting confirmation.");
+        setBookingService(null);
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
+  if (!coach) return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-background"><Navbar />
+    <div className="min-h-screen bg-background">
+      <Navbar />
       <div className="container-wide section-spacing">
-        <div className="max-w-3xl">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xl font-bold">
-              {coach.profiles?.full_name?.[0]?.toUpperCase() || "C"}
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">{coach.profiles?.full_name}</h1>
-              <p className="text-muted-foreground">{coach.headline || "Coach"}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 mb-6">
-            <Star size={16} className="text-accent fill-accent" />
-            <span className="font-medium text-foreground">{Number(coach.rating).toFixed(1)}</span>
-            {coach.is_verified && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Verified by Coursevia</span>}
-            <span className="text-sm text-muted-foreground font-mono">${Number(coach.hourly_rate || 0).toFixed(2)}/hr</span>
-          </div>
-          {coach.profiles?.bio && <p className="text-muted-foreground leading-relaxed mb-6">{coach.profiles.bio}</p>}
-          {coach.skills?.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-6">
-              {coach.skills.map((s: string) => <span key={s} className="text-xs bg-secondary text-secondary-foreground px-2.5 py-1 rounded-full">{s}</span>)}
-            </div>
-          )}
-          <h2 className="text-lg font-semibold text-foreground mb-4">Services</h2>
-          {services.length === 0 ? <p className="text-sm text-muted-foreground">No services listed yet.</p> : (
-            <div className="space-y-3">
-              {services.map(s => (
-                <div key={s.id} className="bg-card border border-border rounded-lg p-4 flex justify-between items-center">
-                  <div>
-                    <p className="font-medium text-foreground">{s.title}</p>
-                    <p className="text-sm text-muted-foreground">{s.duration_minutes} min · <span className="font-mono">${Number(s.price).toFixed(2)}</span></p>
+        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            {/* Coach Header */}
+            <div className="flex items-center gap-4 mb-6">
+              <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold">
+                {coach.profile?.full_name?.[0]?.toUpperCase() || "C"}
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">{coach.profile?.full_name}</h1>
+                <p className="text-muted-foreground">{coach.headline || "Coach"}</p>
+                <div className="flex items-center gap-3 mt-1">
+                  <div className="flex items-center gap-1">
+                    <Star size={14} className="text-accent fill-accent" />
+                    <span className="text-sm font-medium">{Number(coach.rating).toFixed(1)}</span>
+                    <span className="text-xs text-muted-foreground">({coach.total_reviews} reviews)</span>
                   </div>
-                  <Button size="sm" onClick={() => toast.info("Booking flow coming soon")}>Book Now</Button>
+                  {coach.is_verified && (
+                    <span className="flex items-center gap-1 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                      <Shield size={12} /> Verified
+                    </span>
+                  )}
                 </div>
-              ))}
+              </div>
             </div>
-          )}
+
+            {coach.profile?.bio && (
+              <p className="text-muted-foreground leading-relaxed mb-6">{coach.profile.bio}</p>
+            )}
+
+            {/* Skills & Languages */}
+            <div className="flex flex-wrap gap-4 mb-8">
+              {coach.skills?.length > 0 && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Skills</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {coach.skills.map((s: string) => (
+                      <span key={s} className="text-xs bg-secondary text-secondary-foreground px-2.5 py-1 rounded-full">{s}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {coach.languages?.length > 0 && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Languages</p>
+                  <div className="flex items-center gap-1.5">
+                    <Globe size={14} className="text-muted-foreground" />
+                    <span className="text-sm text-foreground">{coach.languages.join(", ")}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Services */}
+            <h2 className="text-xl font-bold text-foreground mb-4">Services & Packages</h2>
+            {services.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No services listed yet.</p>
+            ) : (
+              <div className="space-y-3 mb-8">
+                {services.map(s => (
+                  <div key={s.id} className="bg-card border border-border rounded-lg p-5">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-semibold text-foreground">{s.title}</p>
+                        {s.description && <p className="text-sm text-muted-foreground mt-1">{s.description}</p>}
+                        <div className="flex items-center gap-3 mt-2">
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Clock size={12} /> {s.duration_minutes} min
+                          </span>
+                          <span className="text-sm font-mono font-bold text-foreground">${Number(s.price).toFixed(2)}</span>
+                        </div>
+                      </div>
+                      <Button size="sm" onClick={() => {
+                        if (!user) { toast.info("Please sign in to book"); return; }
+                        setBookingService(s);
+                      }}>
+                        Book Now
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Reviews */}
+            <h2 className="text-xl font-bold text-foreground mb-4">Reviews</h2>
+            {reviews.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No reviews yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {reviews.map(r => (
+                  <div key={r.id} className="bg-card border border-border rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="flex">
+                        {[1,2,3,4,5].map(star => (
+                          <Star key={star} size={14} className={star <= r.rating ? "text-accent fill-accent" : "text-muted-foreground"} />
+                        ))}
+                      </div>
+                      <span className="text-xs text-muted-foreground">{(r as any).profiles?.full_name || "Anonymous"}</span>
+                    </div>
+                    {r.comment && <p className="text-sm text-foreground">{r.comment}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div>
+            <div className="bg-card border border-border rounded-xl p-6 sticky top-24">
+              <p className="text-sm text-muted-foreground">Starting at</p>
+              <span className="text-3xl font-bold text-foreground font-mono block mb-1">
+                ${Number(coach.hourly_rate || 0).toFixed(2)}
+              </span>
+              <span className="text-xs text-muted-foreground">per hour</span>
+
+              <div className="mt-4 space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Students</span>
+                  <span className="text-foreground font-medium">{coach.total_students}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Reviews</span>
+                  <span className="text-foreground font-medium">{coach.total_reviews}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Booking Modal */}
+      {bookingService && !showPayment && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-card border border-border rounded-xl max-w-md w-full p-6">
+            <h2 className="text-lg font-bold text-foreground mb-4">Book: {bookingService.title}</h2>
+            <div className="space-y-4">
+              <div>
+                <Label>Select Date & Time</Label>
+                <Input type="datetime-local" value={bookingDate} onChange={(e) => setBookingDate(e.target.value)} min={new Date().toISOString().slice(0, 16)} />
+              </div>
+              <div>
+                <Label>Notes (optional)</Label>
+                <Textarea value={bookingNotes} onChange={(e) => setBookingNotes(e.target.value)} placeholder="What would you like to discuss?" rows={3} />
+              </div>
+              <div className="bg-secondary/50 rounded-lg p-3 text-sm">
+                <div className="flex justify-between"><span className="text-muted-foreground">Duration</span><span>{bookingService.duration_minutes} min</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Price</span><span className="font-mono font-bold">${Number(bookingService.price).toFixed(2)}</span></div>
+              </div>
+              <div className="flex gap-2">
+                <Button className="flex-1" onClick={handleBooking} disabled={bookingLoading}>
+                  {bookingLoading ? "Booking..." : "Confirm Booking"}
+                </Button>
+                <Button variant="outline" onClick={() => setBookingService(null)}>Cancel</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPayment && bookingService && (
+        <PaymentModal
+          contentType="booking"
+          contentId={bookingService.id}
+          contentTitle={`Coaching: ${bookingService.title}`}
+          amount={Number(bookingService.price)}
+          onClose={() => { setShowPayment(false); setBookingService(null); }}
+          onSuccess={() => { setShowPayment(false); setBookingService(null); toast.success("Booking confirmed! Awaiting admin approval."); }}
+        />
+      )}
+
       <Footer />
     </div>
   );
 };
+
 export default CoachDetails;
