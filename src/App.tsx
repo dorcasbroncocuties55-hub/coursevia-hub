@@ -57,6 +57,9 @@ import UploadVideo from "./pages/creator/UploadVideo";
 import CreatorContent from "./pages/creator/CreatorContent";
 import CreatorAnalytics from "./pages/creator/CreatorAnalytics";
 
+// Therapist dashboard
+import TherapistDashboard from "./pages/therapist/TherapistDashboard";
+
 // Admin
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -132,6 +135,9 @@ const App = () => (
             <Route path="/coach/wallet" element={<ProtectedRoute requiredRole="coach"><CoachWallet /></ProtectedRoute>} />
             <Route path="/coach/withdrawals" element={<ProtectedRoute requiredRole="coach"><CoachWithdrawals /></ProtectedRoute>} />
             <Route path="/coach/reviews" element={<ProtectedRoute requiredRole="coach"><CoachReviews /></ProtectedRoute>} />
+
+            {/* Therapist */}
+            <Route path="/therapist/dashboard" element={<ProtectedRoute requiredRole="therapist"><TherapistDashboard /></ProtectedRoute>} />
 
             {/* Creator */}
             <Route path="/creator/dashboard" element={<ProtectedRoute requiredRole="creator"><CreatorDashboard /></ProtectedRoute>} />

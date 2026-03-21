@@ -30,14 +30,13 @@ const ProtectedRoute = ({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // If onboarding not completed and we require it, redirect (unless already on /onboarding)
   if (requireOnboarding && profile && !profile.onboarding_completed && location.pathname !== "/onboarding") {
     return <Navigate to="/onboarding" replace />;
   }
 
   if (requiredRole && !roles.includes(requiredRole)) {
-    // Redirect to the appropriate dashboard based on first role
     if (roles.includes("admin")) return <Navigate to="/admin/dashboard" replace />;
+    if (roles.includes("therapist")) return <Navigate to="/therapist/dashboard" replace />;
     if (roles.includes("coach")) return <Navigate to="/coach/dashboard" replace />;
     if (roles.includes("creator")) return <Navigate to="/creator/dashboard" replace />;
     if (roles.includes("learner")) return <Navigate to="/dashboard" replace />;

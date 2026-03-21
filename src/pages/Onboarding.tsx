@@ -5,14 +5,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { GraduationCap, BookOpen, Lightbulb, Check } from "lucide-react";
+import { GraduationCap, BookOpen, Lightbulb, Heart, Check } from "lucide-react";
 
-type RoleOption = "learner" | "coach" | "creator";
+type RoleOption = "learner" | "coach" | "creator" | "therapist";
 
 const roles: { value: RoleOption; label: string; description: string; icon: React.ElementType }[] = [
   { value: "learner", label: "Learner", description: "Browse courses, book coaches, and access premium content.", icon: GraduationCap },
   { value: "coach", label: "Coach", description: "Offer coaching services, manage bookings, and earn from expertise.", icon: BookOpen },
   { value: "creator", label: "Creator", description: "Upload courses, publish videos, and build your brand.", icon: Lightbulb },
+  { value: "therapist", label: "Therapist", description: "Offer therapy sessions, manage clients, and provide wellness services.", icon: Heart },
 ];
 
 const Onboarding = () => {
@@ -26,18 +27,15 @@ const Onboarding = () => {
     setLoading(true);
 
     try {
-      // Insert role
       const { error: roleError } = await supabase
         .from("user_roles")
         .insert({ user_id: user.id, role: selectedRole });
       if (roleError) throw roleError;
 
-      // If coach, create coach profile
-      if (selectedRole === "coach") {
+      if (selectedRole === "coach" || selectedRole === "therapist") {
         await supabase.from("coach_profiles").insert({ user_id: user.id });
       }
 
-      // Mark onboarding complete
       await supabase
         .from("profiles")
         .update({ onboarding_completed: true })
@@ -50,6 +48,7 @@ const Onboarding = () => {
         learner: "/dashboard",
         coach: "/coach/dashboard",
         creator: "/creator/dashboard",
+        therapist: "/therapist/dashboard",
       };
       navigate(redirectMap[selectedRole]);
     } catch (error: any) {

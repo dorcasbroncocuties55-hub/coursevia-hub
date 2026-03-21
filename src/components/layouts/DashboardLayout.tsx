@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, BookOpen, Video, Calendar, MessageSquare,
   Bell, CreditCard, Heart, Settings, LogOut, User, Wallet,
-  Users, Upload, BarChart3, FileText, Shield, Flag, ChevronLeft,
+  Users, Upload, BarChart3, FileText, Shield, Flag,
 } from "lucide-react";
 
 interface NavItem {
@@ -41,6 +41,19 @@ const coachNav: NavItem[] = [
   { label: "Reviews", href: "/coach/reviews", icon: FileText },
 ];
 
+const therapistNav: NavItem[] = [
+  { label: "Dashboard", href: "/therapist/dashboard", icon: LayoutDashboard },
+  { label: "Profile", href: "/therapist/profile", icon: User },
+  { label: "Services", href: "/therapist/services", icon: BookOpen },
+  { label: "Calendar", href: "/therapist/calendar", icon: Calendar },
+  { label: "Bookings", href: "/therapist/bookings", icon: Calendar },
+  { label: "Clients", href: "/therapist/clients", icon: Users },
+  { label: "Sessions", href: "/therapist/sessions", icon: Video },
+  { label: "Messages", href: "/therapist/messages", icon: MessageSquare },
+  { label: "Wallet", href: "/therapist/wallet", icon: Wallet },
+  { label: "Withdrawals", href: "/therapist/withdrawals", icon: CreditCard },
+];
+
 const creatorNav: NavItem[] = [
   { label: "Dashboard", href: "/creator/dashboard", icon: LayoutDashboard },
   { label: "Upload Course", href: "/creator/upload-course", icon: Upload },
@@ -69,7 +82,7 @@ const adminNav: NavItem[] = [
 
 interface DashboardLayoutProps {
   children: ReactNode;
-  role: "learner" | "coach" | "creator" | "admin";
+  role: "learner" | "coach" | "creator" | "therapist" | "admin";
 }
 
 const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
@@ -77,7 +90,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const { signOut, profile } = useAuth();
 
-  const navMap = { learner: learnerNav, coach: coachNav, creator: creatorNav, admin: adminNav };
+  const navMap = { learner: learnerNav, coach: coachNav, creator: creatorNav, therapist: therapistNav, admin: adminNav };
   const nav = navMap[role];
 
   const handleSignOut = async () => {
@@ -87,10 +100,9 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Sidebar */}
       <aside className="w-64 border-r border-border bg-card hidden lg:flex flex-col">
         <div className="p-4 border-b border-border">
-          <Link to="/" className="text-lg font-bold text-foreground">Coursevia</Link>
+          <Link to="/" className="text-lg font-bold text-primary">Coursevia</Link>
           <p className="text-xs text-muted-foreground capitalize mt-0.5">{role} Dashboard</p>
         </div>
 
@@ -135,10 +147,9 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
         </div>
       </aside>
 
-      {/* Mobile header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card border-b border-border">
         <div className="flex items-center justify-between px-4 h-14">
-          <Link to="/" className="text-lg font-bold text-foreground">Coursevia</Link>
+          <Link to="/" className="text-lg font-bold text-primary">Coursevia</Link>
           <Button variant="ghost" size="sm" onClick={handleSignOut}>
             <LogOut size={18} />
           </Button>
@@ -164,7 +175,6 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
         </div>
       </div>
 
-      {/* Main content */}
       <main className="flex-1 overflow-y-auto lg:p-8 p-4 pt-28 lg:pt-8">
         {children}
       </main>
