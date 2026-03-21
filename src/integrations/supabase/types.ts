@@ -1194,6 +1194,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_notification: {
+        Args: {
+          _link?: string
+          _message: string
+          _title: string
+          _type?: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1203,7 +1213,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "learner" | "coach" | "creator" | "admin"
+      app_role: "learner" | "coach" | "creator" | "admin" | "therapist"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1331,7 +1341,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["learner", "coach", "creator", "admin"],
+      app_role: ["learner", "coach", "creator", "admin", "therapist"],
     },
   },
 } as const

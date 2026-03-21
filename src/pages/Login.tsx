@@ -17,13 +17,14 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Redirect if already logged in
   useEffect(() => {
     if (user && profile) {
       if (!profile.onboarding_completed) {
         navigate("/onboarding");
       } else if (roles.includes("admin")) {
         navigate("/admin/dashboard");
+      } else if (roles.includes("therapist")) {
+        navigate("/therapist/dashboard");
       } else if (roles.includes("coach")) {
         navigate("/coach/dashboard");
       } else if (roles.includes("creator")) {
@@ -42,7 +43,6 @@ const Login = () => {
     if (error) {
       toast.error(error.message);
     }
-    // Auth state change listener handles redirect
   };
 
   const handleGoogleLogin = async () => {
@@ -56,7 +56,7 @@ const Login = () => {
     <div className="min-h-screen bg-background flex">
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
-          <Link to="/" className="text-xl font-bold text-foreground">Coursevia</Link>
+          <Link to="/" className="text-xl font-bold text-primary">Coursevia</Link>
           <h1 className="text-2xl font-bold text-foreground mt-8 mb-2">Welcome back</h1>
           <p className="text-muted-foreground text-sm mb-8">Sign in to continue learning and growing.</p>
 

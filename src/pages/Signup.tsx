@@ -18,7 +18,6 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Redirect if already logged in
   useEffect(() => {
     if (user && profile) {
       if (!profile.onboarding_completed) {
@@ -48,8 +47,7 @@ const Signup = () => {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Account created! Redirecting to onboarding...");
-      // Auth state listener handles redirect
+      toast.success("Account created! Redirecting...");
     }
   };
 
@@ -64,7 +62,7 @@ const Signup = () => {
     <div className="min-h-screen bg-background flex">
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
-          <Link to="/" className="text-xl font-bold text-foreground">Coursevia</Link>
+          <Link to="/" className="text-xl font-bold text-primary">Coursevia</Link>
           <h1 className="text-2xl font-bold text-foreground mt-8 mb-2">Create your account</h1>
           <p className="text-muted-foreground text-sm mb-8">Start your journey to learn, teach, or coach.</p>
 
@@ -116,7 +114,7 @@ const Signup = () => {
         </div>
       </div>
 
-      <div className="hidden lg:flex flex-1 bg-accent/5 items-center justify-center p-12">
+      <div className="hidden lg:flex flex-1 bg-primary/5 items-center justify-center p-12">
         <div className="max-w-md text-center">
           <h2 className="text-3xl font-bold text-foreground mb-4">Turn your expertise into income</h2>
           <p className="text-muted-foreground">Create courses, coach students, and build your brand on Coursevia.</p>

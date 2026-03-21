@@ -1,90 +1,79 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight, GraduationCap, Star } from "lucide-react";
+import heroImage from "@/assets/hero-student.png";
 
 const HeroSection = () => {
   return (
-    <section className="section-spacing relative overflow-hidden">
-      {/* Subtle gradient bg */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
-
+    <section className="relative overflow-hidden bg-primary/5 py-12 lg:py-20">
       <div className="container-wide relative">
-        <div className="max-w-3xl mx-auto text-center">
+        <div className="grid lg:grid-cols-2 gap-8 items-center">
+          {/* Left text */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
           >
-            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-4 py-1.5 text-xs font-medium text-muted-foreground mb-6">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-              Trusted by 10,000+ learners and creators
+            <span className="inline-flex items-center gap-2 text-sm font-medium text-primary mb-4">
+              <GraduationCap size={18} />
+              Start your favourite course
             </span>
-          </motion.div>
 
-          <motion.h1
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.1] mb-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            Transform the Way You{" "}
-            <span className="text-gradient">Learn, Grow,</span> and Build
-            Your Business
-          </motion.h1>
+            <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold tracking-tight text-foreground leading-[1.1] mb-6">
+              Now learning from anywhere, and build your{" "}
+              <span className="text-primary">bright career.</span>
+            </h1>
 
-          <motion.p
-            className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            Coursevia gives you access to courses, business knowledge, and
-            expert coaches in one powerful platform. Learn at your own pace,
-            get mentored by verified experts, and monetize your skills.
-          </motion.p>
+            <p className="text-muted-foreground text-lg mb-8 max-w-lg">
+              Coursevia gives you access to courses, business knowledge, and expert coaches in one powerful platform.
+            </p>
 
-          <motion.div
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <Button variant="hero" size="lg" asChild>
-              <Link to="/signup">
-                Get Started Free
-                <ArrowRight className="ml-1" size={18} />
-              </Link>
-            </Button>
-            <Button variant="heroOutline" size="lg" asChild>
+            <Button size="lg" asChild className="rounded-full px-8">
               <Link to="/courses">
-                <Play size={18} className="mr-1" />
-                Browse Courses
+                Start A Course
+                <ArrowRight className="ml-2" size={18} />
               </Link>
             </Button>
           </motion.div>
 
-          {/* Stats */}
+          {/* Right image with floating badges */}
           <motion.div
-            className="grid grid-cols-3 gap-8 mt-16 pt-8 border-t border-border"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
+            className="relative flex justify-center lg:justify-end"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
           >
-            {[
-              { value: "10K+", label: "Active Learners" },
-              { value: "500+", label: "Expert Coaches" },
-              { value: "2,000+", label: "Courses Available" },
-            ].map((stat) => (
-              <div key={stat.label}>
-                <div className="text-2xl sm:text-3xl font-bold text-foreground font-mono">
-                  {stat.value}
-                </div>
-                <div className="text-sm text-muted-foreground mt-1">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
+            <div className="relative">
+              <img
+                src={heroImage}
+                alt="Student learning on Coursevia"
+                className="w-80 lg:w-96 object-contain"
+              />
+
+              {/* Floating course count badge */}
+              <motion.div
+                className="absolute top-8 right-0 bg-primary text-primary-foreground rounded-full h-24 w-24 flex flex-col items-center justify-center shadow-lg"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.6, type: "spring" }}
+              >
+                <GraduationCap size={20} />
+                <span className="text-lg font-bold">1,235</span>
+                <span className="text-[10px]">courses</span>
+              </motion.div>
+
+              {/* Rating badge */}
+              <motion.div
+                className="absolute top-0 right-[-20px] bg-card border border-border rounded-lg px-3 py-2 shadow-md flex items-center gap-2"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.8, type: "spring" }}
+              >
+                <span className="text-xl font-bold text-foreground">4.8</span>
+                <Star size={16} className="text-yellow-500 fill-yellow-500" />
+              </motion.div>
+            </div>
           </motion.div>
         </div>
       </div>
