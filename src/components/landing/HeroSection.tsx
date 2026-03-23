@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ArrowRight, GraduationCap, Star, Users } from "lucide-react";
+import heroStudent from "@/assets/hero-student.png";
 import heroBusiness from "@/assets/hero-business.png";
 import heroCreator from "@/assets/hero-creator.png";
 import heroTherapist from "@/assets/hero-therapist.png";
@@ -51,75 +52,87 @@ const HeroSection = () => {
             </div>
           </motion.div>
 
-          {/* Right — 3 images in a grid layout */}
+          {/* Right — student hero + 3 smaller images */}
           <motion.div
-            className="relative"
+            className="relative flex justify-center lg:justify-end"
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <div className="grid grid-cols-2 gap-3 max-w-md mx-auto lg:ml-auto">
-              {/* Top-left: Rating badge + Therapist image (tall) */}
-              <motion.div
-                className="row-span-2 relative rounded-2xl overflow-hidden shadow-lg"
+            <div className="relative">
+              {/* Main student image */}
+              <motion.img
+                src={heroStudent}
+                alt="Student learning on Coursevia"
+                className="w-64 sm:w-72 lg:w-80 object-contain relative z-10"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
+              />
+
+              {/* Top-right: Therapist thumbnail */}
+              <motion.div
+                className="absolute -top-2 -right-4 sm:right-0 z-20 rounded-xl overflow-hidden border-[3px] border-background shadow-lg"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.5, type: "spring" }}
               >
                 <img
                   src={heroTherapist}
                   alt="Therapist on Coursevia"
-                  className="w-full h-full object-cover min-h-[260px] sm:min-h-[320px]"
-                />
-                {/* Rating badge overlay */}
-                <motion.div
-                  className="absolute top-3 left-3 bg-card/90 backdrop-blur-sm border border-border rounded-lg px-3 py-1.5 shadow-md flex items-center gap-1.5"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.8, type: "spring" }}
-                >
-                  <span className="text-lg font-bold text-foreground">4.8</span>
-                  <Star size={14} className="text-yellow-500 fill-yellow-500" />
-                </motion.div>
-              </motion.div>
-
-              {/* Top-right: Creator image */}
-              <motion.div
-                className="rounded-2xl overflow-hidden shadow-lg"
-                initial={{ y: -20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
-              >
-                <img
-                  src={heroCreator}
-                  alt="Content creator on Coursevia"
-                  className="w-full h-36 sm:h-40 object-cover"
+                  className="w-24 h-20 sm:w-28 sm:h-24 object-cover"
                 />
               </motion.div>
 
-              {/* Bottom-right: Business image + course badge */}
+              {/* Bottom-left: Business thumbnail */}
               <motion.div
-                className="relative rounded-2xl overflow-hidden shadow-lg"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5, duration: 0.5 }}
+                className="absolute bottom-12 -left-8 sm:-left-12 z-20 rounded-xl overflow-hidden border-[3px] border-background shadow-lg"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.6, type: "spring" }}
               >
                 <img
                   src={heroBusiness}
                   alt="Business coaching on Coursevia"
-                  className="w-full h-36 sm:h-40 object-cover"
+                  className="w-24 h-20 sm:w-28 sm:h-24 object-cover"
                 />
-                {/* Course count badge */}
-                <motion.div
-                  className="absolute bottom-2 right-2 bg-primary text-primary-foreground rounded-full h-16 w-16 flex flex-col items-center justify-center shadow-lg text-center"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.9, type: "spring" }}
-                >
-                  <GraduationCap size={14} />
-                  <span className="text-xs font-bold leading-tight">1,235</span>
-                  <span className="text-[8px] leading-tight">courses</span>
-                </motion.div>
+              </motion.div>
+
+              {/* Bottom-right: Creator thumbnail */}
+              <motion.div
+                className="absolute bottom-4 -right-6 sm:-right-8 z-20 rounded-xl overflow-hidden border-[3px] border-background shadow-lg"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.7, type: "spring" }}
+              >
+                <img
+                  src={heroCreator}
+                  alt="Content creator on Coursevia"
+                  className="w-24 h-20 sm:w-28 sm:h-24 object-cover"
+                />
+              </motion.div>
+
+              {/* Rating badge */}
+              <motion.div
+                className="absolute top-6 left-0 z-30 bg-card/90 backdrop-blur-sm border border-border rounded-lg px-3 py-1.5 shadow-md flex items-center gap-1.5"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.8, type: "spring" }}
+              >
+                <span className="text-lg font-bold text-foreground">4.8</span>
+                <Star size={14} className="text-yellow-500 fill-yellow-500" />
+              </motion.div>
+
+              {/* Course count badge */}
+              <motion.div
+                className="absolute top-2 right-24 sm:right-32 z-30 bg-primary text-primary-foreground rounded-full h-16 w-16 flex flex-col items-center justify-center shadow-lg"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.9, type: "spring" }}
+              >
+                <GraduationCap size={14} />
+                <span className="text-xs font-bold leading-tight">1,235</span>
+                <span className="text-[8px] leading-tight">courses</span>
               </motion.div>
             </div>
           </motion.div>
