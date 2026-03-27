@@ -5,32 +5,32 @@ const features = [
   {
     icon: BookOpen,
     title: "Course Marketplace",
-    description: "Browse and purchase high-quality courses from verified creators across hundreds of categories.",
+    description: "Discover high-quality courses from verified professionals across practical and in-demand categories.",
   },
   {
     icon: Users,
     title: "Expert Coaching",
-    description: "Book 1-on-1 sessions with verified coaches. Get personalized mentorship that accelerates results.",
+    description: "Book one-to-one sessions with qualified coaches and receive focused guidance tailored to your goals.",
   },
   {
     icon: Video,
     title: "Premium Video Content",
-    description: "Netflix-style video library with cinematic learning experiences. Preview before you pay.",
+    description: "Access high-quality educational content designed for real-world learning, flexible viewing, and premium delivery.",
   },
   {
     icon: Wallet,
-    title: "Built-in Wallet System",
-    description: "Secure internal wallet with full ledger. Track every transaction, earning, and withdrawal.",
+    title: "Secure Payments",
+    description: "Seamlessly manage payments, subscriptions, earnings, and withdrawals through a reliable and transparent payment experience.",
   },
   {
     icon: Shield,
     title: "Verified & Trusted",
-    description: "Every coach and creator goes through ID verification. Funds held in escrow for your safety.",
+    description: "Providers are reviewed before approval so learners can engage with greater confidence.",
   },
   {
     icon: MessageSquare,
-    title: "Secure Messaging",
-    description: "Built-in chat with anti-leak protection. Your private information stays safe on our platform.",
+    title: "Professional Messaging",
+    description: "Communicate safely inside the platform with structured conversations built for serious collaboration.",
   },
 ];
 
@@ -38,30 +38,30 @@ const FeaturesSection = () => {
   return (
     <section className="section-spacing bg-secondary/50">
       <div className="container-wide">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+        <div className="mb-16 text-center">
+          <h2 className="mb-4 text-3xl font-bold text-foreground sm:text-4xl">
             Everything you need to learn, teach, and grow
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            One platform that combines course creation, expert coaching, and secure payments.
+          <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+            One platform that brings together content, coaching, messaging, and secure payments in a professional experience.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature, i) => (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((feature, index) => (
             <motion.div
               key={feature.title}
-              className="bg-card rounded-lg border border-border p-6 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
+              className="rounded-lg border border-border bg-card p-6 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
+              transition={{ delay: index * 0.1 }}
             >
-              <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center mb-4">
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
                 <feature.icon className="text-primary" size={20} />
               </div>
-              <h3 className="font-semibold text-foreground mb-2">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
+              <h3 className="mb-2 font-semibold text-foreground">{feature.title}</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground">{feature.description}</p>
             </motion.div>
           ))}
         </div>

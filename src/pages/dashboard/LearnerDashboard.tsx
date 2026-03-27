@@ -2,26 +2,29 @@ import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { BookOpen, Video, Calendar, Bell } from "lucide-react";
+import { BookOpen, Video, Calendar, Bell, CreditCard } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const LearnerDashboard = () => {
   const { user, profile } = useAuth();
-  const [stats, setStats] = useState({ courses: 0, videos: 0, bookings: 0, notifications: 0 });
+  const [stats, setStats] = useState({ courses: 0, videos: 0, bookings: 0, notifications: 0, paymentMethods: 0 });
 
   useEffect(() => {
     if (!user) return;
     const fetchStats = async () => {
-      const [courses, videos, bookings, notifs] = await Promise.all([
+      const [courses, videos, bookings, notifs, paymentMethods] = await Promise.all([
         supabase.from("content_access").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("content_type", "course"),
         supabase.from("content_access").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("content_type", "video"),
         supabase.from("bookings").select("id", { count: "exact", head: true }).eq("learner_id", user.id),
         supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false),
+        supabase.from("payment_methods" as any).select("id", { count: "exact", head: true }).eq("user_id", user.id),
       ]);
       setStats({
         courses: courses.count || 0,
         videos: videos.count || 0,
         bookings: bookings.count || 0,
         notifications: notifs.count || 0,
+        paymentMethods: paymentMethods.count || 0,
       });
     };
     fetchStats();
@@ -32,6 +35,7 @@ const LearnerDashboard = () => {
     { label: "My Videos", value: stats.videos, icon: Video, color: "text-accent" },
     { label: "Bookings", value: stats.bookings, icon: Calendar, color: "text-primary" },
     { label: "Unread Alerts", value: stats.notifications, icon: Bell, color: "text-accent" },
+    { label: "Saved Cards", value: stats.paymentMethods, icon: CreditCard, color: "text-primary" },
   ];
 
   return (
@@ -55,9 +59,16 @@ const LearnerDashboard = () => {
         ))}
       </div>
 
-      <div className="mt-8 bg-card border border-border rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-foreground mb-4">Recent Activity</h2>
-        <p className="text-sm text-muted-foreground">Your recent courses, bookings, and activity will appear here.</p>
+      <div className="mt-8 grid gap-4 lg:grid-cols-[1.1fr,0.9fr]">
+        <div className="bg-card border border-border rounded-lg p-6">
+          <h2 className="text-lg font-semibold text-foreground mb-4">Recent Activity</h2>
+          <p className="text-sm text-muted-foreground">Your recent courses, bookings, and activity will appear here.</p>
+        </div>
+        <div className="bg-card border border-border rounded-lg p-6">
+          <h2 className="text-lg font-semibold text-foreground mb-2">Checkout setup</h2>
+          <p className="text-sm text-muted-foreground mb-4">Add a card once so subscription, video, and booking checkout is faster from your dashboard.</p>
+          <Link to="/dashboard/payment-methods" className="text-sm font-medium text-primary hover:underline">Manage payment methods</Link>
+        </div>
       </div>
     </DashboardLayout>
   );

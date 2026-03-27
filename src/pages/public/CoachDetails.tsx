@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Star, Shield, Clock, Globe, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
+import { initializeCheckout } from "@/lib/paymentGateway";
 import PaymentModal from "@/components/PaymentModal";
 
 const CoachDetails = () => {
@@ -21,8 +22,8 @@ const CoachDetails = () => {
   const [bookingService, setBookingService] = useState<any>(null);
   const [bookingDate, setBookingDate] = useState("");
   const [bookingNotes, setBookingNotes] = useState("");
-  const [showPayment, setShowPayment] = useState(false);
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -44,7 +45,7 @@ const CoachDetails = () => {
     }
     setBookingLoading(true);
     try {
-      const { error } = await supabase.from("bookings").insert({
+      const { data: booking, error } = await supabase.from("bookings").insert({
         coach_id: bookingService.coach_id,
         learner_id: user.id,
         service_id: bookingService.id,
@@ -52,16 +53,37 @@ const CoachDetails = () => {
         duration_minutes: bookingService.duration_minutes,
         notes: bookingNotes,
         status: "pending",
-      });
+        meeting_url: `https://meet.jit.si/coursevia-${crypto.randomUUID()}`,
+      }).select().single();
       if (error) throw error;
 
-      // If service has a price, show payment
       if (Number(bookingService.price) > 0) {
-        setShowPayment(true);
-      } else {
-        toast.success("Booking created! Awaiting confirmation.");
-        setBookingService(null);
+        const {
+          data: { user: authUser },
+        } = await supabase.auth.getUser();
+
+        if (!authUser?.email) {
+          throw new Error("A valid learner email is required before starting payment.");
+        }
+
+        const checkout = await initializeCheckout({
+          email: authUser.email,
+          user_id: user.id,
+          type: "booking",
+          amount: Number(bookingService.price),
+          content_id: booking.id,
+          content_title: `Coaching: ${bookingService.title}`,
+        });
+
+        toast.success("Booking created. Redirecting to secure checkout...");
+        window.location.assign(checkout.authorization_url);
+        return;
       }
+
+      toast.success("Booking created! Awaiting confirmation.");
+      setBookingService(null);
+      setBookingDate("");
+      setBookingNotes("");
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -92,8 +114,8 @@ const CoachDetails = () => {
                 <div className="flex items-center gap-3 mt-1">
                   <div className="flex items-center gap-1">
                     <Star size={14} className="text-accent fill-accent" />
-                    <span className="text-sm font-medium">{Number(coach.rating).toFixed(1)}</span>
-                    <span className="text-xs text-muted-foreground">({coach.total_reviews} reviews)</span>
+                    <span className="text-sm font-medium">{Number(coach.rating || 0).toFixed(1)}</span>
+                    <span className="text-xs text-muted-foreground">({coach.total_reviews || 0} reviews)</span>
                   </div>
                   {coach.is_verified && (
                     <span className="flex items-center gap-1 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
@@ -210,7 +232,7 @@ const CoachDetails = () => {
       </div>
 
       {/* Booking Modal */}
-      {bookingService && !showPayment && (
+      {bookingService && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-card border border-border rounded-xl max-w-md w-full p-6">
             <h2 className="text-lg font-bold text-foreground mb-4">Book: {bookingService.title}</h2>
