@@ -55,7 +55,7 @@ const CourseDetails = () => {
           .from("content_purchases" as any)
           .select("id")
           .eq("user_id", user.id)
-          .eq("content_id", contentItem.id)
+          .eq("content_id", (contentItem as any).id)
           .maybeSingle();
 
         setHasAccess(!!purchase);
