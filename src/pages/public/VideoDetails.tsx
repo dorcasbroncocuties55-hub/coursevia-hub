@@ -70,25 +70,25 @@ const VideoDetails = () => {
 
       setCreator(creatorData || null);
 
-      if (!episodesError && episodeRows && episodeRows.length > 0) {
-        setEpisodes(episodeRows as EpisodeRow[]);
+      if (!episodesError && episodeRows && (episodeRows as any[]).length > 0) {
+        setEpisodes(episodeRows as unknown as EpisodeRow[]);
       } else {
         setEpisodes([
           {
-            id: data.id,
-            title: data.title,
-            description: data.description,
-            video_url: data.video_url,
-            video_storage_path: data.video_storage_path || null,
+            id: (data as any).id,
+            title: (data as any).title,
+            description: (data as any).description,
+            video_url: (data as any).video_url,
+            video_storage_path: (data as any).video_storage_path || null,
             episode_number: 1,
             is_preview: true,
           },
         ]);
       }
 
-      const access = await isOwnerOrHasVideoAccess(user?.id, data.id, data.owner_id);
+      const access = await isOwnerOrHasVideoAccess(user?.id, (data as any).id, (data as any).owner_id);
       setHasAccess(access);
-      setPaymentPending(await hasPendingVideoPayment(user?.id, data.id));
+      setPaymentPending(await hasPendingVideoPayment(user?.id, (data as any).id));
       return true;
     };
 

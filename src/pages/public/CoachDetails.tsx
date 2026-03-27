@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Star, Shield, Clock, Globe, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { initializeCheckout } from "@/lib/paymentGateway";
+import PaymentModal from "@/components/PaymentModal";
 
 const CoachDetails = () => {
   const { id } = useParams();
