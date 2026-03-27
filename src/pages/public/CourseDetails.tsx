@@ -38,12 +38,12 @@ const CourseDetails = () => {
         supabase
           .from("content_episodes" as any)
           .select("*")
-          .eq("content_id", contentItem.id)
+          .eq("content_id", (contentItem as any).id)
           .order("episode_number", { ascending: true }),
         supabase
           .from("profiles")
           .select("full_name, avatar_url, profile_slug, profession")
-          .eq("user_id", contentItem.owner_id)
+          .eq("user_id", (contentItem as any).owner_id)
           .maybeSingle(),
       ]);
 
