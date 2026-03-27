@@ -143,7 +143,7 @@ const UploadVideo = () => {
           await createFallbackVideo(storagePath, thumbnailUrl, numericPrice);
         } else {
           const { error: episodeError } = await supabase.from("content_episodes" as any).insert({
-            content_id: contentItem.id,
+            content_id: (contentItem as any).id,
             title: title.trim(),
             description: description.trim() || null,
             video_url: null,
