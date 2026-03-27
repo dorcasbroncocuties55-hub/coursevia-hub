@@ -158,7 +158,7 @@ const UploadVideo = () => {
               await supabase
                 .from("content_items" as any)
                 .update({ video_storage_path: storagePath } as any)
-                .eq("id", contentItem.id);
+                .eq("id", (contentItem as any).id);
             } else {
               throw episodeError;
             }
