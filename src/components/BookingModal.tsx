@@ -46,10 +46,7 @@ export default function BookingModal({
 
         if (conflict) {
           const chooseAnother = window.confirm(
-            "This time is not available.
-
-Press OK to choose another time.
-Press Cancel to message the provider."
+            "This time is not available.\n\nPress OK to choose another time.\nPress Cancel to message the provider."
           );
 
           if (!chooseAnother) {
