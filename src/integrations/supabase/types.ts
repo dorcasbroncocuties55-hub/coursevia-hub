@@ -847,6 +847,7 @@ export type Database = {
           id: string
           is_flagged: boolean | null
           is_read: boolean | null
+          message_type: string | null
           offer_id: string | null
           receiver_id: string
           sender_id: string
@@ -857,6 +858,7 @@ export type Database = {
           id?: string
           is_flagged?: boolean | null
           is_read?: boolean | null
+          message_type?: string | null
           offer_id?: string | null
           receiver_id: string
           sender_id: string
@@ -867,6 +869,7 @@ export type Database = {
           id?: string
           is_flagged?: boolean | null
           is_read?: boolean | null
+          message_type?: string | null
           offer_id?: string | null
           receiver_id?: string
           sender_id?: string
@@ -1018,17 +1021,28 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           booking_price: number | null
+          business_address: string | null
+          business_description: string | null
+          business_email: string | null
+          business_name: string | null
+          business_phone: string | null
+          business_website: string | null
           certification: string | null
+          city: string | null
           country: string | null
           created_at: string
+          display_name: string | null
           email: string | null
           experience: string | null
           full_name: string | null
+          gender: string | null
           id: string
+          languages: string[] | null
           onboarding_completed: boolean | null
           phone: string | null
           primary_category_id: string | null
           profession: string | null
+          profile_photo_url: string | null
           profile_slug: string | null
           role: string | null
           specialization_slug: string | null
@@ -1041,17 +1055,28 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           booking_price?: number | null
+          business_address?: string | null
+          business_description?: string | null
+          business_email?: string | null
+          business_name?: string | null
+          business_phone?: string | null
+          business_website?: string | null
           certification?: string | null
+          city?: string | null
           country?: string | null
           created_at?: string
+          display_name?: string | null
           email?: string | null
           experience?: string | null
           full_name?: string | null
+          gender?: string | null
           id?: string
+          languages?: string[] | null
           onboarding_completed?: boolean | null
           phone?: string | null
           primary_category_id?: string | null
           profession?: string | null
+          profile_photo_url?: string | null
           profile_slug?: string | null
           role?: string | null
           specialization_slug?: string | null
@@ -1064,17 +1089,28 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           booking_price?: number | null
+          business_address?: string | null
+          business_description?: string | null
+          business_email?: string | null
+          business_name?: string | null
+          business_phone?: string | null
+          business_website?: string | null
           certification?: string | null
+          city?: string | null
           country?: string | null
           created_at?: string
+          display_name?: string | null
           email?: string | null
           experience?: string | null
           full_name?: string | null
+          gender?: string | null
           id?: string
+          languages?: string[] | null
           onboarding_completed?: boolean | null
           phone?: string | null
           primary_category_id?: string | null
           profession?: string | null
+          profile_photo_url?: string | null
           profile_slug?: string | null
           role?: string | null
           specialization_slug?: string | null
@@ -1505,6 +1541,7 @@ export type Database = {
           id: string
           owner_amount: number
           platform_fee: number
+          status: string | null
           user_id: string
           video_id: string
         }
@@ -1514,6 +1551,7 @@ export type Database = {
           id?: string
           owner_amount?: number
           platform_fee?: number
+          status?: string | null
           user_id: string
           video_id: string
         }
@@ -1523,6 +1561,7 @@ export type Database = {
           id?: string
           owner_amount?: number
           platform_fee?: number
+          status?: string | null
           user_id?: string
           video_id?: string
         }
@@ -1766,15 +1805,44 @@ export type Database = {
         Args: { user_email: string }
         Returns: boolean
       }
-      complete_onboarding: {
-        Args: {
-          _primary_category_id?: string
-          _role?: string
-          _specialization_slug?: string
-          _specialization_type?: string
-        }
-        Returns: undefined
-      }
+      complete_onboarding:
+        | {
+            Args: {
+              _primary_category_id?: string
+              _role?: string
+              _specialization_slug?: string
+              _specialization_type?: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              p_bio?: string
+              p_booking_price?: number
+              p_business_address?: string
+              p_business_description?: string
+              p_business_email?: string
+              p_business_name?: string
+              p_business_phone?: string
+              p_business_website?: string
+              p_certification?: string
+              p_city?: string
+              p_country?: string
+              p_display_name?: string
+              p_experience?: string
+              p_full_name?: string
+              p_gender?: string
+              p_languages?: string[]
+              p_phone?: string
+              p_primary_category_id?: string
+              p_profession?: string
+              p_profile_photo_url?: string
+              p_role?: string
+              p_specialization_slug?: string
+              p_specialization_type?: string
+            }
+            Returns: undefined
+          }
       create_notification: {
         Args: {
           _link?: string
@@ -1785,7 +1853,9 @@ export type Database = {
         }
         Returns: undefined
       }
-      ensure_my_profile_and_role: { Args: never; Returns: undefined }
+      ensure_my_profile_and_role:
+        | { Args: never; Returns: undefined }
+        | { Args: { p_requested_role?: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
