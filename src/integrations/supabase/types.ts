@@ -807,6 +807,39 @@ export type Database = {
           },
         ]
       }
+      custom_offers: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          receiver_id: string
+          sender_id: string
+          status: string
+          title: string | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          receiver_id: string
+          sender_id: string
+          status?: string
+          title?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          receiver_id?: string
+          sender_id?: string
+          status?: string
+          title?: string | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -814,6 +847,7 @@ export type Database = {
           id: string
           is_flagged: boolean | null
           is_read: boolean | null
+          offer_id: string | null
           receiver_id: string
           sender_id: string
         }
@@ -823,6 +857,7 @@ export type Database = {
           id?: string
           is_flagged?: boolean | null
           is_read?: boolean | null
+          offer_id?: string | null
           receiver_id: string
           sender_id: string
         }
@@ -832,6 +867,7 @@ export type Database = {
           id?: string
           is_flagged?: boolean | null
           is_read?: boolean | null
+          offer_id?: string | null
           receiver_id?: string
           sender_id?: string
         }
@@ -1305,6 +1341,30 @@ export type Database = {
           },
         ]
       }
+      user_badges: {
+        Row: {
+          badge_type: string
+          earned_at: string
+          id: string
+          label: string
+          user_id: string
+        }
+        Insert: {
+          badge_type: string
+          earned_at?: string
+          id?: string
+          label: string
+          user_id: string
+        }
+        Update: {
+          badge_type?: string
+          earned_at?: string
+          id?: string
+          label?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1437,6 +1497,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      video_purchases: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          owner_amount: number
+          platform_fee: number
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          owner_amount?: number
+          platform_fee?: number
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          owner_amount?: number
+          platform_fee?: number
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: []
       }
       videos: {
         Row: {
@@ -1668,9 +1758,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_booking_completion: {
+        Args: { _booking_id: string }
+        Returns: undefined
+      }
       check_user_exists_by_email: {
         Args: { user_email: string }
         Returns: boolean
+      }
+      complete_onboarding: {
+        Args: {
+          _primary_category_id?: string
+          _role?: string
+          _specialization_slug?: string
+          _specialization_type?: string
+        }
+        Returns: undefined
       }
       create_notification: {
         Args: {
@@ -1682,6 +1785,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      ensure_my_profile_and_role: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
