@@ -44,43 +44,163 @@ export type Database = {
         }
         Relationships: []
       }
+      bank_accounts: {
+        Row: {
+          account_name: string | null
+          account_number: string | null
+          bank_name: string | null
+          country: string | null
+          created_at: string | null
+          currency: string | null
+          id: string
+          is_default: boolean | null
+          swift_code: string | null
+          user_id: string
+        }
+        Insert: {
+          account_name?: string | null
+          account_number?: string | null
+          bank_name?: string | null
+          country?: string | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          is_default?: boolean | null
+          swift_code?: string | null
+          user_id: string
+        }
+        Update: {
+          account_name?: string | null
+          account_number?: string | null
+          bank_name?: string | null
+          country?: string | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          is_default?: boolean | null
+          swift_code?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      billing_plans: {
+        Row: {
+          active: boolean
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          interval: string
+          metadata: Json
+          name: string
+          plan_key: string
+          provider: string
+          provider_plan_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          interval?: string
+          metadata?: Json
+          name: string
+          plan_key: string
+          provider?: string
+          provider_plan_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          interval?: string
+          metadata?: Json
+          name?: string
+          plan_key?: string
+          provider?: string
+          provider_plan_code?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
+          booking_type: string | null
           coach_id: string
           created_at: string
           duration_minutes: number
           id: string
           learner_id: string
+          meeting_link: string | null
           meeting_url: string | null
           notes: string | null
+          paid_at: string | null
+          payment_reference: string | null
+          payment_status: string | null
+          price: number | null
+          provider_id: string | null
+          provider_type: string | null
           scheduled_at: string
           service_id: string | null
+          session_ends_at: string | null
+          session_opens_at: string | null
+          session_room_url: string | null
+          session_starts_at: string | null
           status: string | null
           updated_at: string
         }
         Insert: {
+          booking_type?: string | null
           coach_id: string
           created_at?: string
           duration_minutes?: number
           id?: string
           learner_id: string
+          meeting_link?: string | null
           meeting_url?: string | null
           notes?: string | null
+          paid_at?: string | null
+          payment_reference?: string | null
+          payment_status?: string | null
+          price?: number | null
+          provider_id?: string | null
+          provider_type?: string | null
           scheduled_at: string
           service_id?: string | null
+          session_ends_at?: string | null
+          session_opens_at?: string | null
+          session_room_url?: string | null
+          session_starts_at?: string | null
           status?: string | null
           updated_at?: string
         }
         Update: {
+          booking_type?: string | null
           coach_id?: string
           created_at?: string
           duration_minutes?: number
           id?: string
           learner_id?: string
+          meeting_link?: string | null
           meeting_url?: string | null
           notes?: string | null
+          paid_at?: string | null
+          payment_reference?: string | null
+          payment_status?: string | null
+          price?: number | null
+          provider_id?: string | null
+          provider_type?: string | null
           scheduled_at?: string
           service_id?: string | null
+          session_ends_at?: string | null
+          session_opens_at?: string | null
+          session_room_url?: string | null
+          session_starts_at?: string | null
           status?: string | null
           updated_at?: string
         }
@@ -108,6 +228,7 @@ export type Database = {
           icon: string | null
           id: string
           name: string
+          role_type: string | null
           slug: string
         }
         Insert: {
@@ -116,6 +237,7 @@ export type Database = {
           icon?: string | null
           id?: string
           name: string
+          role_type?: string | null
           slug: string
         }
         Update: {
@@ -124,6 +246,7 @@ export type Database = {
           icon?: string | null
           id?: string
           name?: string
+          role_type?: string | null
           slug?: string
         }
         Relationships: []
@@ -308,6 +431,186 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      content_episodes: {
+        Row: {
+          content_id: string
+          created_at: string
+          description: string | null
+          duration_seconds: number
+          episode_number: number
+          id: string
+          is_preview: boolean
+          title: string
+          video_storage_path: string | null
+          video_url: string | null
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number
+          episode_number?: number
+          id?: string
+          is_preview?: boolean
+          title: string
+          video_storage_path?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number
+          episode_number?: number
+          id?: string
+          is_preview?: boolean
+          title?: string
+          video_storage_path?: string | null
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_episodes_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_feedback_requests: {
+        Row: {
+          content_id: string
+          created_at: string
+          id: string
+          learner_id: string
+          message: string
+          owner_id: string
+          status: string
+          subject: string | null
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          id?: string
+          learner_id: string
+          message: string
+          owner_id: string
+          status?: string
+          subject?: string | null
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          id?: string
+          learner_id?: string
+          message?: string
+          owner_id?: string
+          status?: string
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_feedback_requests_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_items: {
+        Row: {
+          category_id: string | null
+          content_type: string
+          created_at: string
+          description: string | null
+          id: string
+          is_published: boolean
+          owner_id: string
+          owner_role: string | null
+          preview_seconds: number
+          price: number
+          slug: string | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          video_storage_path: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          content_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          owner_id: string
+          owner_role?: string | null
+          preview_seconds?: number
+          price?: number
+          slug?: string | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          video_storage_path?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          content_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          owner_id?: string
+          owner_role?: string | null
+          preview_seconds?: number
+          price?: number
+          slug?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          video_storage_path?: string | null
+        }
+        Relationships: []
+      }
+      content_purchases: {
+        Row: {
+          amount: number
+          content_id: string
+          created_at: string
+          id: string
+          owner_amount: number
+          platform_fee: number
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          content_id: string
+          created_at?: string
+          id?: string
+          owner_amount?: number
+          platform_fee?: number
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          content_id?: string
+          created_at?: string
+          id?: string
+          owner_amount?: number
+          platform_fee?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_purchases_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       course_lessons: {
         Row: {
@@ -613,12 +916,20 @@ export type Database = {
           currency: string | null
           id: string
           invoice_url: string | null
+          metadata: Json | null
           payer_id: string
           payment_method: string | null
           payment_type: string
+          provider: string | null
+          provider_customer_code: string | null
+          provider_email_token: string | null
+          provider_plan_code: string | null
+          provider_subscription_code: string | null
+          reference: string | null
           reference_id: string | null
           status: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           admin_notes?: string | null
@@ -627,12 +938,20 @@ export type Database = {
           currency?: string | null
           id?: string
           invoice_url?: string | null
+          metadata?: Json | null
           payer_id: string
           payment_method?: string | null
           payment_type: string
+          provider?: string | null
+          provider_customer_code?: string | null
+          provider_email_token?: string | null
+          provider_plan_code?: string | null
+          provider_subscription_code?: string | null
+          reference?: string | null
           reference_id?: string | null
           status?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           admin_notes?: string | null
@@ -641,12 +960,20 @@ export type Database = {
           currency?: string | null
           id?: string
           invoice_url?: string | null
+          metadata?: Json | null
           payer_id?: string
           payment_method?: string | null
           payment_type?: string
+          provider?: string | null
+          provider_customer_code?: string | null
+          provider_email_token?: string | null
+          provider_plan_code?: string | null
+          provider_subscription_code?: string | null
+          reference?: string | null
           reference_id?: string | null
           status?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -654,38 +981,101 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          booking_price: number | null
+          certification: string | null
           country: string | null
           created_at: string
+          email: string | null
+          experience: string | null
           full_name: string | null
           id: string
           onboarding_completed: boolean | null
           phone: string | null
+          primary_category_id: string | null
+          profession: string | null
+          profile_slug: string | null
+          role: string | null
+          specialization_slug: string | null
+          specialization_type: string | null
+          status: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          booking_price?: number | null
+          certification?: string | null
           country?: string | null
           created_at?: string
+          email?: string | null
+          experience?: string | null
           full_name?: string | null
           id?: string
           onboarding_completed?: boolean | null
           phone?: string | null
+          primary_category_id?: string | null
+          profession?: string | null
+          profile_slug?: string | null
+          role?: string | null
+          specialization_slug?: string | null
+          specialization_type?: string | null
+          status?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          booking_price?: number | null
+          certification?: string | null
           country?: string | null
           created_at?: string
+          email?: string | null
+          experience?: string | null
           full_name?: string | null
           id?: string
           onboarding_completed?: boolean | null
           phone?: string | null
+          primary_category_id?: string | null
+          profession?: string | null
+          profile_slug?: string | null
+          role?: string | null
+          specialization_slug?: string | null
+          specialization_type?: string | null
+          status?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      purchases: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          owner_amount: number
+          platform_fee: number
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          owner_amount?: number
+          platform_fee?: number
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          owner_amount?: number
+          platform_fee?: number
+          user_id?: string
+          video_id?: string
         }
         Relationships: []
       }
@@ -761,30 +1151,93 @@ export type Database = {
         }
         Relationships: []
       }
+      session_reminders: {
+        Row: {
+          booking_id: string
+          created_at: string
+          id: string
+          remind_at: string
+          sent: boolean
+          user_id: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          id?: string
+          remind_at: string
+          sent?: boolean
+          user_id: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          id?: string
+          remind_at?: string
+          sent?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
+          amount: number | null
+          billing_cycle: string | null
+          cancel_at_period_end: boolean | null
           created_at: string
           ends_at: string
+          expires_at: string | null
           id: string
+          last_payment_reference: string | null
+          metadata: Json | null
+          payment_provider: string | null
+          paystack_customer_code: string | null
+          paystack_email_token: string | null
+          paystack_plan_code: string | null
+          paystack_subscription_code: string | null
           plan: string
+          started_at: string | null
           starts_at: string
           status: string | null
           user_id: string
         }
         Insert: {
+          amount?: number | null
+          billing_cycle?: string | null
+          cancel_at_period_end?: boolean | null
           created_at?: string
           ends_at: string
+          expires_at?: string | null
           id?: string
+          last_payment_reference?: string | null
+          metadata?: Json | null
+          payment_provider?: string | null
+          paystack_customer_code?: string | null
+          paystack_email_token?: string | null
+          paystack_plan_code?: string | null
+          paystack_subscription_code?: string | null
           plan: string
+          started_at?: string | null
           starts_at?: string
           status?: string | null
           user_id: string
         }
         Update: {
+          amount?: number | null
+          billing_cycle?: string | null
+          cancel_at_period_end?: boolean | null
           created_at?: string
           ends_at?: string
+          expires_at?: string | null
           id?: string
+          last_payment_reference?: string | null
+          metadata?: Json | null
+          payment_provider?: string | null
+          paystack_customer_code?: string | null
+          paystack_email_token?: string | null
+          paystack_plan_code?: string | null
+          paystack_subscription_code?: string | null
           plan?: string
+          started_at?: string | null
           starts_at?: string
           status?: string | null
           user_id?: string
@@ -993,9 +1446,14 @@ export type Database = {
           description: string | null
           duration_seconds: number | null
           id: string
+          is_paid: boolean | null
+          is_published: boolean | null
+          owner_role: string | null
+          preview_seconds: number | null
           price: number
           slug: string
           status: string | null
+          storage_path: string | null
           thumbnail_url: string | null
           title: string
           total_views: number | null
@@ -1009,9 +1467,14 @@ export type Database = {
           description?: string | null
           duration_seconds?: number | null
           id?: string
+          is_paid?: boolean | null
+          is_published?: boolean | null
+          owner_role?: string | null
+          preview_seconds?: number | null
           price?: number
           slug: string
           status?: string | null
+          storage_path?: string | null
           thumbnail_url?: string | null
           title: string
           total_views?: number | null
@@ -1025,9 +1488,14 @@ export type Database = {
           description?: string | null
           duration_seconds?: number | null
           id?: string
+          is_paid?: boolean | null
+          is_published?: boolean | null
+          owner_role?: string | null
+          preview_seconds?: number | null
           price?: number
           slug?: string
           status?: string | null
+          storage_path?: string | null
           thumbnail_url?: string | null
           title?: string
           total_views?: number | null
@@ -1090,26 +1558,32 @@ export type Database = {
       }
       wallets: {
         Row: {
+          available_balance: number | null
           balance: number
           created_at: string
           currency: string | null
           id: string
+          pending_balance: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          available_balance?: number | null
           balance?: number
           created_at?: string
           currency?: string | null
           id?: string
+          pending_balance?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          available_balance?: number | null
           balance?: number
           created_at?: string
           currency?: string | null
           id?: string
+          pending_balance?: number | null
           updated_at?: string
           user_id?: string
         }
@@ -1194,6 +1668,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_user_exists_by_email: {
+        Args: { user_email: string }
+        Returns: boolean
+      }
       create_notification: {
         Args: {
           _link?: string
@@ -1211,6 +1689,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin_bootstrap_open: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "learner" | "coach" | "creator" | "admin" | "therapist"
