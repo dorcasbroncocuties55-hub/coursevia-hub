@@ -59,12 +59,12 @@ const VideoDetails = () => {
         supabase
           .from("profiles")
           .select("full_name, profile_slug")
-          .eq("user_id", data.owner_id)
+          .eq("user_id", (data as any).owner_id)
           .maybeSingle(),
         supabase
           .from("content_episodes" as any)
           .select("id, title, description, video_url, video_storage_path, episode_number, is_preview")
-          .eq("content_id", data.id)
+          .eq("content_id", (data as any).id)
           .order("episode_number", { ascending: true }),
       ]);
 
