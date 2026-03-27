@@ -1,55 +1,163 @@
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { Pencil, Save, X } from "lucide-react";
+
+type EditingState = {
+  id: string;
+  value: string;
+} | null;
 
 const CreatorContent = () => {
-  const { user } = useAuth();
-  const [courses, setCourses] = useState<any[]>([]);
-  const [videos, setVideos] = useState<any[]>([]);
+  const { user, roles } = useAuth();
+  const [items, setItems] = useState<any[]>([]);
+  const [editing, setEditing] = useState<EditingState>(null);
+
+  const portalRole = useMemo(() => {
+    if (roles.includes("coach")) return "coach";
+    if (roles.includes("therapist")) return "therapist";
+    return "creator";
+  }, [roles]);
+
+  const roleLabel = useMemo(() => {
+    if (portalRole === "coach") return "Coach";
+    if (portalRole === "therapist") return "Therapist";
+    return "Creator";
+  }, [portalRole]);
+
+  const loadData = async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from("content_items" as any)
+      .select("*, content_episodes(count)")
+      .eq("owner_id", user.id)
+      .eq("owner_role", portalRole)
+      .order("created_at", { ascending: false });
+
+    setItems((data as any[]) || []);
+  };
 
   useEffect(() => {
-    if (!user) return;
-    supabase.from("courses").select("*").eq("creator_id", user.id).order("created_at", { ascending: false }).then(({ data }) => setCourses(data || []));
-    supabase.from("videos").select("*").eq("creator_id", user.id).order("created_at", { ascending: false }).then(({ data }) => setVideos(data || []));
-  }, [user]);
+    loadData();
+  }, [user, portalRole]);
+
+  const startEdit = (id: string, price: number) => {
+    setEditing({ id, value: String(price ?? 0) });
+  };
+
+  const cancelEdit = () => setEditing(null);
+
+  const savePrice = async () => {
+    if (!editing) return;
+    const nextPrice = parseFloat(editing.value);
+
+    if (Number.isNaN(nextPrice) || nextPrice < 0) {
+      toast.error("Enter a valid price.");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("content_items" as any)
+      .update({ price: nextPrice } as any)
+      .eq("id", editing.id);
+
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+
+    toast.success("Price updated");
+    setEditing(null);
+    loadData();
+  };
+
+  const togglePublish = async (id: string, current: boolean) => {
+    const { error } = await supabase
+      .from("content_items" as any)
+      .update({ is_published: !current } as any)
+      .eq("id", id);
+
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+
+    toast.success("Content updated");
+    loadData();
+  };
 
   return (
-    <DashboardLayout role="creator">
-      <h1 className="text-2xl font-bold text-foreground mb-6">Content Manager</h1>
-      <h2 className="text-lg font-semibold text-foreground mb-3">Courses ({courses.length})</h2>
-      {courses.length === 0 ? (
-        <p className="text-sm text-muted-foreground mb-6">No courses yet.</p>
-      ) : (
-        <div className="space-y-2 mb-6">
-          {courses.map(c => (
-            <div key={c.id} className="bg-card border border-border rounded-lg p-4 flex justify-between items-center">
+    <DashboardLayout role={portalRole as any}>
+      <h1 className="text-2xl font-bold text-foreground mb-6">{roleLabel} Content Manager</h1>
+      <p className="text-sm text-muted-foreground mb-6">
+        Publish and manage single videos, episode series, and courses from your {roleLabel.toLowerCase()} portal.
+      </p>
+
+      <div className="space-y-4">
+        {items.length === 0 ? (
+          <div className="bg-card border border-border rounded-lg p-6 text-sm text-muted-foreground">
+            No unified content published yet.
+          </div>
+        ) : items.map((item) => (
+          <div key={item.id} className="bg-card border border-border rounded-lg p-4">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div>
-                <p className="font-medium text-foreground">{c.title}</p>
-                <p className="text-xs text-muted-foreground capitalize">{c.status} · ${Number(c.price).toFixed(2)}</p>
+                <p className="text-xs uppercase tracking-wide text-primary mb-2">
+                  {String(item.content_type).replace("_", " ")}
+                </p>
+                <h2 className="font-semibold text-foreground">{item.title}</h2>
+                <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
               </div>
-              <span className={`text-xs px-2 py-0.5 rounded-full ${c.status === "published" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>{c.status}</span>
-            </div>
-          ))}
-        </div>
-      )}
-      <h2 className="text-lg font-semibold text-foreground mb-3">Videos ({videos.length})</h2>
-      {videos.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No videos yet.</p>
-      ) : (
-        <div className="space-y-2">
-          {videos.map(v => (
-            <div key={v.id} className="bg-card border border-border rounded-lg p-4 flex justify-between items-center">
-              <div>
-                <p className="font-medium text-foreground">{v.title}</p>
-                <p className="text-xs text-muted-foreground capitalize">{v.status} · ${Number(v.price).toFixed(2)}</p>
+
+              <div className="flex flex-wrap items-center gap-3">
+                {editing?.id === item.id ? (
+                  <>
+                    <Input
+                      className="w-28"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={editing.value}
+                      onChange={(e) =>
+                        setEditing((prev) => (prev ? { ...prev, value: e.target.value } : prev))
+                      }
+                    />
+                    <Button size="icon" variant="outline" onClick={savePrice}>
+                      <Save size={16} />
+                    </Button>
+                    <Button size="icon" variant="ghost" onClick={cancelEdit}>
+                      <X size={16} />
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <span className="font-mono text-sm font-bold">
+                      ${Number(item.price || 0).toFixed(2)}
+                    </span>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => startEdit(item.id, item.price)}
+                    >
+                      <Pencil size={16} />
+                    </Button>
+                  </>
+                )}
+                <Button variant="outline" onClick={() => togglePublish(item.id, !!item.is_published)}>
+                  {item.is_published ? "Unpublish" : "Publish"}
+                </Button>
               </div>
-              <span className={`text-xs px-2 py-0.5 rounded-full ${v.status === "published" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>{v.status}</span>
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        ))}
+      </div>
     </DashboardLayout>
   );
 };
+
 export default CreatorContent;

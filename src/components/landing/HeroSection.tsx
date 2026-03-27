@@ -57,17 +57,26 @@ const HeroSection = () => {
             className="relative flex justify-center lg:justify-end"
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
           >
             <div className="relative">
-              {/* Main student image */}
+              {/* Main student image with Swinging Animation */}
               <motion.img
                 src={heroStudent}
                 alt="Student learning on Coursevia"
-                className="w-64 sm:w-72 lg:w-80 object-contain relative z-10"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
+                className="relative z-10 w-64 object-contain sm:w-72 lg:w-80"
+                initial={{ opacity: 0, rotate: -3 }}
+                animate={{ opacity: 1, rotate: 3 }}
+                transition={{
+                  opacity: { duration: 1 }, // Fades in once
+                  rotate: {
+                    duration: 3,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                    ease: "linear", // Constant speed swinging
+                  },
+                }}
+                style={{ transformOrigin: "bottom center" }}
               />
 
               {/* Top-right: Therapist thumbnail */}
@@ -119,7 +128,7 @@ const HeroSection = () => {
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.8, type: "spring" }}
               >
-                <span className="text-lg font-bold text-foreground">4.8</span>
+                <span className="text-lg font-bold text-foreground">5.0</span>
                 <Star size={14} className="text-yellow-500 fill-yellow-500" />
               </motion.div>
 

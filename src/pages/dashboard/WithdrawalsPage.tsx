@@ -1,85 +1,191 @@
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { useAuth } from "@/contexts/AuthContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
+import { backendRequest } from "@/lib/backendApi";
 
-const WithdrawalsPage = ({ role }: { role: "coach" | "creator" }) => {
+type PayoutAccount = {
+  id: string;
+  bank_name: string;
+  account_name: string | null;
+  account_number: string;
+  country_code: string;
+  provider: string;
+  verification_status: string;
+};
+
+type WithdrawalRow = {
+  id: string;
+  amount: number;
+  status: string;
+  created_at: string;
+};
+
+const WithdrawalsPage = ({ role }: { role: "coach" | "creator" | "therapist" }) => {
   const { user } = useAuth();
-  const [withdrawals, setWithdrawals] = useState<any[]>([]);
+  const [withdrawals, setWithdrawals] = useState<WithdrawalRow[]>([]);
   const [wallet, setWallet] = useState<any>(null);
+  const [accounts, setAccounts] = useState<PayoutAccount[]>([]);
+  const [selectedAccountId, setSelectedAccountId] = useState("");
   const [amount, setAmount] = useState("");
-  const [bankName, setBankName] = useState("");
-  const [accountNumber, setAccountNumber] = useState("");
-  const [accountName, setAccountName] = useState("");
-  const [showForm, setShowForm] = useState(false);
+  const [processing, setProcessing] = useState(false);
+
+  const verifiedAccounts = useMemo(
+    () => accounts.filter((account) => String(account.verification_status || "").toLowerCase() === "verified"),
+    [accounts],
+  );
+
+  const loadData = async () => {
+    if (!user) return;
+    try {
+      const [{ data: walletData }, withdrawalsResult, accountsResult] = await Promise.all([
+        supabase.from("wallets").select("*").eq("user_id", user.id).single(),
+        backendRequest<{ withdrawals: WithdrawalRow[] }>(`/api/payouts/withdrawals?user_id=${encodeURIComponent(user.id)}`),
+        backendRequest<{ accounts: PayoutAccount[] }>(`/api/payouts/accounts?user_id=${encodeURIComponent(user.id)}`),
+      ]);
+
+      setWallet(walletData);
+      setWithdrawals(withdrawalsResult.withdrawals || []);
+      setAccounts(accountsResult.accounts || []);
+      setSelectedAccountId((current) => current || accountsResult.accounts?.find((acc) => acc.verification_status === "verified")?.id || "");
+    } catch (error: any) {
+      toast.error(error.message || "Could not load payout details.");
+    }
+  };
 
   useEffect(() => {
-    if (!user) return;
-    supabase.from("wallets").select("*").eq("user_id", user.id).single().then(({ data }) => setWallet(data));
-    supabase.from("withdrawal_requests").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).then(({ data }) => setWithdrawals(data || []));
+    loadData();
   }, [user]);
 
-  const handleWithdraw = async () => {
+  const handleCashout = async () => {
     if (!user || !wallet) return;
-    const amt = parseFloat(amount);
-    if (isNaN(amt) || amt <= 0 || amt > Number(wallet.balance)) {
-      toast.error("Invalid amount");
+    const amt = Number(amount);
+    const available = Number((wallet as any).available_balance ?? wallet.balance ?? 0);
+    const selectedAccount = verifiedAccounts.find((account) => account.id === selectedAccountId);
+
+    if (!amt || amt <= 0 || amt > available) {
+      toast.error("Enter a valid amount within your available balance.");
       return;
     }
-    const { error } = await supabase.from("withdrawal_requests").insert({
-      user_id: user.id, wallet_id: wallet.id, amount: amt, bank_name: bankName, account_number: accountNumber, account_name: accountName,
-    });
-    if (error) toast.error(error.message);
-    else {
-      toast.success("Withdrawal request submitted");
-      setShowForm(false);
-      setAmount(""); setBankName(""); setAccountNumber(""); setAccountName("");
-      const { data } = await supabase.from("withdrawal_requests").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-      setWithdrawals(data || []);
+
+    if (!selectedAccount) {
+      toast.error("Choose a verified payout account first.");
+      return;
+    }
+
+    try {
+      setProcessing(true);
+      await backendRequest("/api/payouts/withdraw", {
+        method: "POST",
+        body: JSON.stringify({
+          user_id: user.id,
+          amount: amt,
+          bank_account_id: selectedAccountId,
+        }),
+      });
+
+      toast.success("Withdrawal created. Only verified payout methods can move available balance.");
+      setAmount("");
+      await loadData();
+    } catch (error: any) {
+      toast.error(error?.message || "Could not complete withdrawal.");
+    } finally {
+      setProcessing(false);
     }
   };
 
   return (
     <DashboardLayout role={role}>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Withdrawals</h1>
-        <Button size="sm" onClick={() => setShowForm(!showForm)}>Request Withdrawal</Button>
+      <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Withdrawals</h1>
+          <p className="text-sm text-muted-foreground">
+            Withdraw only from verified payout methods. Pending balances stay locked until they mature.
+          </p>
+        </div>
+        <Button size="sm" variant="outline" asChild>
+          <Link to={`/${role}/bank-accounts`}>Manage payout accounts</Link>
+        </Button>
       </div>
-      {showForm && (
-        <div className="bg-card border border-border rounded-lg p-6 mb-6 max-w-lg space-y-4">
-          <p className="text-sm text-muted-foreground">Balance: <span className="font-mono font-medium text-foreground">${Number(wallet?.balance || 0).toFixed(2)}</span></p>
-          <div><Label>Amount ($)</Label><Input type="number" value={amount} onChange={e => setAmount(e.target.value)} /></div>
-          <div><Label>Bank Name</Label><Input value={bankName} onChange={e => setBankName(e.target.value)} /></div>
-          <div><Label>Account Number</Label><Input value={accountNumber} onChange={e => setAccountNumber(e.target.value)} /></div>
-          <div><Label>Account Name</Label><Input value={accountName} onChange={e => setAccountName(e.target.value)} /></div>
-          <Button onClick={handleWithdraw}>Submit Request</Button>
+
+      <div className="mb-6 grid gap-4 sm:grid-cols-2">
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <p className="text-sm text-muted-foreground">Pending balance</p>
+          <p className="text-2xl font-bold text-foreground">${Number((wallet as any)?.pending_balance ?? 0).toFixed(2)}</p>
         </div>
-      )}
-      {withdrawals.length === 0 ? (
-        <div className="bg-card border border-border rounded-lg p-8 text-center"><p className="text-muted-foreground">No withdrawal requests.</p></div>
-      ) : (
-        <div className="space-y-3">
-          {withdrawals.map(w => (
-            <div key={w.id} className="bg-card border border-border rounded-lg p-4 flex justify-between items-center">
-              <div>
-                <p className="font-medium text-foreground font-mono">${Number(w.amount).toFixed(2)}</p>
-                <p className="text-xs text-muted-foreground">{w.bank_name} · {w.account_name}</p>
-              </div>
-              <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-                w.status === "completed" ? "bg-green-100 text-green-700" :
-                w.status === "pending" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
-              }`}>{w.status}</span>
-            </div>
-          ))}
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <p className="text-sm text-muted-foreground">Available balance</p>
+          <p className="text-2xl font-bold text-foreground">${Number((wallet as any)?.available_balance ?? (wallet as any)?.balance ?? 0).toFixed(2)}</p>
         </div>
-      )}
+      </div>
+
+      <div className="mb-6 max-w-2xl space-y-4 rounded-2xl border border-border bg-card p-6">
+        <div>
+          <Label>Withdrawal amount</Label>
+          <Input type="number" min="1" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
+        </div>
+
+        <div>
+          <Label>Verified payout account</Label>
+          <select
+            value={selectedAccountId}
+            onChange={(e) => setSelectedAccountId(e.target.value)}
+            className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+          >
+            <option value="">Choose verified payout account</option>
+            {verifiedAccounts.map((account) => (
+              <option key={account.id} value={account.id}>
+                {account.bank_name} · {account.account_name || "Verified holder"} · {account.account_number}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <Button onClick={handleCashout} disabled={processing || !verifiedAccounts.length}>
+          {processing ? "Processing..." : "Withdraw now"}
+        </Button>
+
+        {!verifiedAccounts.length ? (
+          <p className="text-sm text-muted-foreground">Add and verify a payout account before withdrawing.</p>
+        ) : null}
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-border bg-secondary/50">
+              <th className="p-3 text-left text-xs font-medium text-muted-foreground">Date</th>
+              <th className="p-3 text-left text-xs font-medium text-muted-foreground">Amount</th>
+              <th className="p-3 text-left text-xs font-medium text-muted-foreground">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {withdrawals.length === 0 ? (
+              <tr>
+                <td colSpan={3} className="p-6 text-center text-sm text-muted-foreground">No withdrawals yet.</td>
+              </tr>
+            ) : (
+              withdrawals.map((w) => (
+                <tr key={w.id} className="border-b border-border last:border-0">
+                  <td className="p-3 text-sm">{new Date(w.created_at).toLocaleDateString()}</td>
+                  <td className="p-3 text-sm font-mono">${Number(w.amount).toFixed(2)}</td>
+                  <td className="p-3 text-sm capitalize">{w.status || "pending"}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </DashboardLayout>
   );
 };
 
+export default WithdrawalsPage;
 export const CoachWithdrawals = () => <WithdrawalsPage role="coach" />;
 export const CreatorWithdrawals = () => <WithdrawalsPage role="creator" />;
+export const TherapistWithdrawals = () => <WithdrawalsPage role="therapist" />;

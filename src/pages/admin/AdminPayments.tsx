@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { getAdminShare, getProviderShare } from "@/lib/pricingRules";
 
 const AdminPayments = () => {
   const { user } = useAuth();
@@ -24,11 +25,21 @@ const AdminPayments = () => {
 
       // 2. Grant content access
       if (payment.reference_id && (payment.payment_type === "course" || payment.payment_type === "video")) {
-        await supabase.from("content_access").insert({
-          user_id: payment.payer_id,
-          content_id: payment.reference_id,
-          content_type: payment.payment_type,
-        });
+        const { data: existingAccess } = await supabase
+          .from("content_access")
+          .select("id")
+          .eq("user_id", payment.payer_id)
+          .eq("content_id", payment.reference_id)
+          .eq("content_type", payment.payment_type)
+          .maybeSingle();
+
+        if (!existingAccess) {
+          await supabase.from("content_access").insert({
+            user_id: payment.payer_id,
+            content_id: payment.reference_id,
+            content_type: payment.payment_type,
+          });
+        }
       }
 
       // 3. Get admin wallet and creator/coach wallet
@@ -40,13 +51,22 @@ const AdminPayments = () => {
         const { data: course } = await supabase.from("courses").select("creator_id").eq("id", payment.reference_id).single();
         ownerId = course?.creator_id || null;
       } else if (payment.payment_type === "video") {
-        const { data: video } = await supabase.from("videos").select("creator_id").eq("id", payment.reference_id).single();
-        ownerId = video?.creator_id || null;
+        const { data: unifiedVideo } = await supabase
+          .from("content_items" as any)
+          .select("owner_id")
+          .eq("id", payment.reference_id)
+          .maybeSingle();
+
+        if (unifiedVideo?.owner_id) {
+          ownerId = unifiedVideo.owner_id;
+        } else {
+          const { data: video } = await supabase.from("videos").select("creator_id").eq("id", payment.reference_id).single();
+          ownerId = video?.creator_id || null;
+        }
       }
 
-      const commissionRate = payment.payment_type === "subscription" ? 1 : 0.05;
-      const commissionAmount = payment.amount * commissionRate;
-      const creatorAmount = payment.amount - commissionAmount;
+      const commissionAmount = getAdminShare(Number(payment.amount || 0), payment.payment_type);
+      const creatorAmount = getProviderShare(Number(payment.amount || 0), payment.payment_type);
 
       // 4. Credit admin wallet with commission
       if (adminWallet) {
@@ -64,7 +84,7 @@ const AdminPayments = () => {
       }
 
       // 5. Credit owner wallet
-      if (ownerId && creatorAmount > 0) {
+      if (payment.payment_type !== "subscription" && ownerId && creatorAmount > 0) {
         const { data: ownerWallet } = await supabase.from("wallets").select("id, balance").eq("user_id", ownerId).single();
         if (ownerWallet) {
           const newOwnerBalance = Number(ownerWallet.balance) + creatorAmount;
@@ -81,11 +101,29 @@ const AdminPayments = () => {
         }
       }
 
-      // 6. Create transaction record
-      const fromWallet = adminWallet;
-      const { data: toWallet } = ownerId
-        ? await supabase.from("wallets").select("id").eq("user_id", ownerId).single()
-        : { data: null };
+      // 6. Sync optional video_purchases approval
+      if (payment.payment_type === "video" && payment.reference_id) {
+        const { data: existingPurchase } = await supabase
+          .from("video_purchases")
+          .select("id")
+          .eq("user_id", payment.payer_id)
+          .eq("video_id", payment.reference_id)
+          .maybeSingle();
+
+        if (existingPurchase) {
+          await supabase
+            .from("video_purchases")
+            .update({ status: "approved" })
+            .eq("id", existingPurchase.id);
+        } else {
+          await supabase.from("video_purchases").insert({
+            user_id: payment.payer_id,
+            video_id: payment.reference_id,
+            amount: payment.amount,
+            status: "approved",
+          } as any);
+        }
+      }
 
       // 7. Notify payer
       await supabase.from("notifications").insert({

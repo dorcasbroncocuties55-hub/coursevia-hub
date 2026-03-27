@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, BookOpen, Video, Calendar, MessageSquare,
   Bell, CreditCard, Heart, Settings, LogOut, User, Wallet,
-  Users, Upload, BarChart3, FileText, Shield, Flag,
+  Users , BarChart3, FileText, Shield, Flag,
 } from "lucide-react";
 
 interface NavItem {
@@ -22,6 +22,7 @@ const learnerNav: NavItem[] = [
   { label: "Wishlist", href: "/dashboard/wishlist", icon: Heart },
   { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
   { label: "Payments", href: "/dashboard/payments", icon: CreditCard },
+  { label: "Payment Methods", href: "/dashboard/payment-methods", icon: Wallet },
   { label: "Subscription", href: "/dashboard/subscription", icon: FileText },
   { label: "Notifications", href: "/dashboard/notifications", icon: Bell },
   { label: "Profile", href: "/dashboard/profile", icon: User },
@@ -31,6 +32,8 @@ const coachNav: NavItem[] = [
   { label: "Dashboard", href: "/coach/dashboard", icon: LayoutDashboard },
   { label: "Profile", href: "/coach/profile", icon: User },
   { label: "Services", href: "/coach/services", icon: BookOpen },
+  { label: "Upload Video", href: "/coach/upload-video", icon: Video },
+  { label: "Content", href: "/coach/content", icon: BookOpen },
   { label: "Calendar", href: "/coach/calendar", icon: Calendar },
   { label: "Bookings", href: "/coach/bookings", icon: Calendar },
   { label: "Clients", href: "/coach/clients", icon: Users },
@@ -45,6 +48,8 @@ const therapistNav: NavItem[] = [
   { label: "Dashboard", href: "/therapist/dashboard", icon: LayoutDashboard },
   { label: "Profile", href: "/therapist/profile", icon: User },
   { label: "Services", href: "/therapist/services", icon: BookOpen },
+  { label: "Upload Video", href: "/therapist/upload-video", icon: Video },
+  { label: "Content", href: "/therapist/content", icon: BookOpen },
   { label: "Calendar", href: "/therapist/calendar", icon: Calendar },
   { label: "Bookings", href: "/therapist/bookings", icon: Calendar },
   { label: "Clients", href: "/therapist/clients", icon: Users },
@@ -56,7 +61,6 @@ const therapistNav: NavItem[] = [
 
 const creatorNav: NavItem[] = [
   { label: "Dashboard", href: "/creator/dashboard", icon: LayoutDashboard },
-  { label: "Upload Course", href: "/creator/upload-course", icon: Upload },
   { label: "Upload Video", href: "/creator/upload-video", icon: Video },
   { label: "Content", href: "/creator/content", icon: BookOpen },
   { label: "Analytics", href: "/creator/analytics", icon: BarChart3 },
@@ -88,13 +92,13 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { signOut, profile } = useAuth();
+  const { logout, profile } = useAuth();
 
   const navMap = { learner: learnerNav, coach: coachNav, creator: creatorNav, therapist: therapistNav, admin: adminNav };
   const nav = navMap[role];
 
   const handleSignOut = async () => {
-    await signOut();
+    await logout();
     navigate("/");
   };
 
@@ -128,12 +132,16 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
 
         <div className="p-3 border-t border-border">
           <div className="flex items-center gap-3 px-3 py-2 mb-2">
-            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
-              {profile?.full_name?.[0]?.toUpperCase() || "U"}
-            </div>
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt={profile?.full_name || "Avatar"} className="h-8 w-8 rounded-full object-cover border border-border" />
+            ) : (
+              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
+                {(profile?.full_name || profile?.email || "User")[0]?.toUpperCase() || "U"}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-foreground truncate">
-                {profile?.full_name || "User"}
+                {profile?.full_name || profile?.email || "User"}
               </p>
             </div>
           </div>

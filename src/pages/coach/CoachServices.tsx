@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { MIN_PROVIDER_PRICE, isValidProviderPrice } from "@/lib/pricingRules";
 import { Plus, Trash2 } from "lucide-react";
 
 const CoachServices = () => {
@@ -21,12 +22,26 @@ const CoachServices = () => {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("coach_profiles").select("id").eq("user_id", user.id).single().then(({ data }) => {
-      if (data) {
-        setCoachId(data.id);
-        supabase.from("coach_services").select("*").eq("coach_id", data.id).then(({ data: s }) => setServices(s || []));
+
+    const bootstrap = async () => {
+      const { data: profileId, error } = await supabase.rpc("get_or_create_provider_profile" as any);
+      if (error) {
+        toast.error(error.message);
+        return;
       }
-    });
+
+      if (profileId) {
+        setCoachId(profileId as string);
+        const { data: serviceRows } = await supabase
+          .from("coach_services")
+          .select("*")
+          .eq("coach_id", profileId as string)
+          .order("created_at", { ascending: false });
+        setServices(serviceRows || []);
+      }
+    };
+
+    bootstrap();
   }, [user]);
 
   const addService = async () => {
@@ -39,7 +54,7 @@ const CoachServices = () => {
       toast.success("Service added");
       setShowForm(false);
       setTitle(""); setDescription(""); setPrice(""); setDuration("60");
-      const { data } = await supabase.from("coach_services").select("*").eq("coach_id", coachId);
+      const { data } = await supabase.from("coach_services").select("*").eq("coach_id", coachId).order("created_at", { ascending: false });
       setServices(data || []);
     }
   };
