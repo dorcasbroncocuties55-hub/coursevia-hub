@@ -57,8 +57,8 @@ const AdminPayments = () => {
           .eq("id", payment.reference_id)
           .maybeSingle();
 
-        if (unifiedVideo?.owner_id) {
-          ownerId = unifiedVideo.owner_id;
+        if ((unifiedVideo as any)?.owner_id) {
+          ownerId = (unifiedVideo as any).owner_id;
         } else {
           const { data: video } = await supabase.from("videos").select("creator_id").eq("id", payment.reference_id).single();
           ownerId = video?.creator_id || null;

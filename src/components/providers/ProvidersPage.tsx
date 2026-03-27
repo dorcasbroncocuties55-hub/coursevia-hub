@@ -13,8 +13,8 @@ export default function ProvidersPage() {
     const loadProviders = async () => {
       setLoading(true);
 
-      const { data, error } = await supabase
-        .from("profiles")
+      const { data, error } = await (supabase
+        .from("profiles") as any)
         .select("*")
         .eq("account_type", "provider")
         .order("created_at", { ascending: false });

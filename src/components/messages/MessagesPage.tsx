@@ -124,9 +124,10 @@ export default function MessagesPage({
                 <div className="max-w-[80%]">
                   {message.message_type === "custom_offer" && message.offer_id ? (
                     <CustomOfferCard
-                      offer={offers[message.offer_id]}
-                      currentUserId={currentUserId}
-                      onAction={loadMessages}
+                      offer={offers[(message as any).offer_id]}
+                      isOwner={(message as any).sender_id === currentUserId}
+                      onAccept={loadMessages}
+                      onDecline={loadMessages}
                     />
                   ) : (
                     <div

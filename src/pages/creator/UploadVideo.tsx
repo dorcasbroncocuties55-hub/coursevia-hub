@@ -190,7 +190,7 @@ const UploadVideo = () => {
           const storagePath = await uploadPrivateVideoFile(user.id, episode.file as File);
 
           const { error: episodeError } = await supabase.from("content_episodes" as any).insert({
-            content_id: contentItem.id,
+            content_id: (contentItem as any).id,
             title: episode.title.trim(),
             description: episode.description.trim() || null,
             video_url: null,

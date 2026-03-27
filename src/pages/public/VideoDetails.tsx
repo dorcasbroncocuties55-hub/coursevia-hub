@@ -122,7 +122,7 @@ const VideoDetails = () => {
         },
       ]);
 
-      const ownerId = data.creator_id || data.user_id;
+      const ownerId = data.creator_id;
       const access = await isOwnerOrHasVideoAccess(user?.id, data.id, ownerId);
       setHasAccess(access);
       setPaymentPending(await hasPendingVideoPayment(user?.id, data.id));
