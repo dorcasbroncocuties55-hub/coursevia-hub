@@ -107,7 +107,7 @@ const VideoDetails = () => {
       const { data: creatorData } = await supabase
         .from("profiles")
         .select("full_name, profile_slug")
-        .eq("user_id", data.creator_id || data.user_id)
+        .eq("user_id", data.creator_id)
         .maybeSingle();
       setCreator(creatorData || null);
       setEpisodes([
