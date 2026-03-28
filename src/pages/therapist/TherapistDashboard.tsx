@@ -11,8 +11,8 @@ const TherapistDashboard = () => {
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [coachProfile, wallet, bookings] = await Promise.all([
-        supabase.from("coach_profiles").select("total_students, rating, id").eq("user_id", user.id).single(),
+      const coachProfile = await supabase.from("coach_profiles").select("total_students, rating, id").eq("user_id", user.id).single();
+      const [wallet, bookings] = await Promise.all([
         supabase.from("wallets").select("balance, available_balance").eq("user_id", user.id).single(),
         supabase.from("bookings").select("id", { count: "exact", head: true })
           .eq("coach_id", coachProfile?.data?.id || "00000000-0000-0000-0000-000000000000"),
