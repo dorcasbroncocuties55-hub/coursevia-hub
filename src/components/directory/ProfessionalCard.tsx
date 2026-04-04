@@ -31,7 +31,7 @@ export default function ProfessionalCard({ profile, providerType }: Props) {
           <div className="flex items-start justify-between gap-2">
             <div>
               <Link to={profileLink} className="flex items-center gap-2 hover:underline">
-                <span className="inline-block h-2.5 w-2.5 rounded-full bg-green-500" />
+                <span className="inline-block h-2.5 w-2.5 rounded-full bg-primary" />
                 <h3 className="text-lg font-bold text-foreground">{name}</h3>
                 {profile.is_verified && (
                   <CheckCircle size={16} className="text-primary fill-primary/20" />
