@@ -9,9 +9,9 @@ import ProfileAvatar from "@/components/shared/ProfileAvatar";
 
 const navLinks = [
   { label: "Courses", href: "/courses" },
-  { label: "Coaches", href: "/coaches" },
+  { label: "Find Coaches", href: "/find-coaches" },
+  { label: "Find Therapists", href: "/find-therapists" },
   { label: "Creators", href: "/creators" },
-  { label: "Therapists", href: "/therapists" },
   { label: "Pricing", href: "/pricing" },
 ];
 

@@ -18,6 +18,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Onboarding from "./pages/Onboarding";
 import About from "./pages/public/About";
 import Therapists from "./pages/public/Therapists";
+import FindProfessionals from "./pages/public/FindProfessionals";
 import Courses from "./pages/public/Courses";
 import CourseDetails from "./pages/public/CourseDetails";
 import Videos from "./pages/public/Videos";
@@ -115,7 +116,10 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/therapists" element={<Therapists />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/find-therapists" element={<FindProfessionals providerType="therapist" />} />
+            <Route path="/find-therapists/:country" element={<FindProfessionals providerType="therapist" />} />
+            <Route path="/find-coaches" element={<FindProfessionals providerType="coach" />} />
+            <Route path="/find-coaches/:country" element={<FindProfessionals providerType="coach" />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/about" element={<About />} />
             <Route path="/courses" element={<Courses />} />

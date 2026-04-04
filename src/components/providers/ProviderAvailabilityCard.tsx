@@ -21,7 +21,7 @@ export default function ProviderAvailabilityCard({
   availability = [],
 }: Props) {
   return (
-    <div className="rounded-2xl border bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
       <h3 className="text-lg font-semibold mb-4">Availability</h3>
 
       {!availability.length ? (
