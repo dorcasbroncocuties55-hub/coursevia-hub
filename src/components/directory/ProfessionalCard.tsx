@@ -41,7 +41,7 @@ export default function ProfessionalCard({ profile, providerType }: Props) {
             </div>
 
             <div className="hidden items-center gap-1 sm:flex">
-              <Star size={14} className="fill-amber-400 text-amber-400" />
+              <Star size={14} className="fill-primary text-primary" />
               <span className="text-sm font-semibold text-foreground">{rating}</span>
             </div>
           </div>
