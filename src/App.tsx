@@ -116,7 +116,10 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/therapists" element={<Therapists />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/find-therapists" element={<FindProfessionals providerType="therapist" />} />
+            <Route path="/find-therapists/:country" element={<FindProfessionals providerType="therapist" />} />
+            <Route path="/find-coaches" element={<FindProfessionals providerType="coach" />} />
+            <Route path="/find-coaches/:country" element={<FindProfessionals providerType="coach" />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/about" element={<About />} />
             <Route path="/courses" element={<Courses />} />
