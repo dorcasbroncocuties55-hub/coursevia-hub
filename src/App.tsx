@@ -18,6 +18,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Onboarding from "./pages/Onboarding";
 import About from "./pages/public/About";
 import Therapists from "./pages/public/Therapists";
+import FindProfessionals from "./pages/public/FindProfessionals";
 import Courses from "./pages/public/Courses";
 import CourseDetails from "./pages/public/CourseDetails";
 import Videos from "./pages/public/Videos";
