@@ -24,38 +24,31 @@ const FEATURED_COUNTRIES = [
 ];
 
 type Props = {
-  basePath: string; // e.g. "/find-therapists" or "/find-coaches"
+  basePath: string;
 };
 
 export default function CountryFlags({ basePath }: Props) {
   const navigate = useNavigate();
-
   const toSlug = (name: string) => name.toLowerCase().replaceAll(" ", "-");
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-6">
-      <h2 className="mb-1 text-xl font-bold text-foreground">Browse by Country</h2>
-      <p className="mb-5 text-sm text-muted-foreground">
-        Select your country to explore verified professionals near you or available online.
-      </p>
-
-      <div className="flex flex-wrap gap-3">
-        {FEATURED_COUNTRIES.map((c) => (
-          <button
-            key={c.code}
-            onClick={() => navigate(`${basePath}/${toSlug(c.name)}`)}
-            className="group flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 text-sm font-medium text-foreground transition hover:border-primary/50 hover:bg-primary/5 hover:shadow-sm"
-          >
-            <img
-              src={`https://flagcdn.com/24x18/${c.code.toLowerCase()}.png`}
-              alt={c.name}
-              className="h-4 w-6 rounded-sm object-cover"
-              loading="lazy"
-            />
-            {c.name}
-          </button>
-        ))}
-      </div>
-    </section>
+    <div className="flex flex-wrap justify-center gap-3">
+      {FEATURED_COUNTRIES.map((c) => (
+        <button
+          key={c.code}
+          onClick={() => navigate(`${basePath}/${toSlug(c.name)}`)}
+          className="group flex items-center gap-2.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition hover:border-primary/50 hover:bg-primary/5 hover:shadow-md"
+        >
+          <img
+            src={`https://flagcdn.com/28x21/${c.code.toLowerCase()}.png`}
+            srcSet={`https://flagcdn.com/56x42/${c.code.toLowerCase()}.png 2x`}
+            alt={c.name}
+            className="h-5 w-7 rounded-sm object-cover"
+            loading="lazy"
+          />
+          {c.name}
+        </button>
+      ))}
+    </div>
   );
 }
